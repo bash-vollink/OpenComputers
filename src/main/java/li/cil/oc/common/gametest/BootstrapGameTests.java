@@ -1,6 +1,6 @@
 package li.cil.oc.common.gametest;
 
-import li.cil.oc.ModBootstrap;
+import li.cil.oc.OpenComputers;
 import li.cil.oc.OpenComputersMod;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -20,8 +20,8 @@ public final class BootstrapGameTests {
 
     @GameTest(template = "empty")
     public static void scalaRuntimeLoaded(final GameTestHelper helper) {
-        helper.assertTrue(ModBootstrap.initialized(), "Scala bootstrap did not run");
-        final String version = ModBootstrap.scalaVersion();
+        helper.assertTrue(OpenComputers.initialized(), "Scala bootstrap did not run");
+        final String version = OpenComputers.scalaVersion();
         helper.assertTrue(version.startsWith("2.13."), "Unexpected Scala runtime version: " + version);
         helper.succeed();
     }

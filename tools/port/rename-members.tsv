@@ -16,7 +16,7 @@ pre	\bEnumFacing\.getHorizontal\(	Direction.from2DDataValue(
 pre	\bEnumFacing\.getFacingFromVector\(	Direction.getNearest(
 pre	\bEnumDyeColor\.SILVER\b	EnumDyeColor.LIGHT_GRAY
 pre	\bEnumDyeColor\.byMetadata\(	EnumDyeColor.byId(
-pre	\bEnumDyeColor\.byDyeDamage\(	EnumDyeColor.byId(
+pre	\bEnumDyeColor\.byDyeDamage\(	li.cil.oc.util.Color.byDyeDamage(
 pre	\bConstants\.NBT\.	Tag.
 pre	ActionResult\.newResult\(	new ActionResult(
 #
@@ -99,8 +99,6 @@ member	getFrontOffsetY	getStepY
 member	getFrontOffsetZ	getStepZ
 member	rotateY	getClockWise
 member	rotateYCCW	getCounterClockWise
-member	up	above
-member	down	below
 member	addVector	add
 #
 # --- text
@@ -108,3 +106,50 @@ member	getUnformattedText	getString
 member	getFormattedText	getString
 member	getPos	getBlockPos
 member	getWorld	getLevel
+#
+# --- Scala 2.11 -> 2.13
+# The implicit Java<->Scala conversions moved; the old objects are gone.
+# (Migrating to explicit .asScala/.asJava is a later cleanup.)
+pre	\bscala\.collection\.convert\.WrapAsScala\b	scala.collection.convert.ImplicitConversionsToScala
+pre	\bscala\.collection\.convert\.WrapAsJava\b	scala.collection.convert.ImplicitConversionsToJava
+pre	\bscala\.collection\.JavaConversions\b	scala.collection.convert.ImplicitConversions
+pre	\bmutable\.MutableList\b	mutable.ListBuffer
+pre	\bscala\.collection\.mutable\.MutableList\b	scala.collection.mutable.ListBuffer
+# Java 11 added String.lines(), which shadows StringOps.lines.
+pre	\.lines\.	.linesIterator.
+pre	\.lines\)	.linesIterator)
+pre	\.lines$	.linesIterator
+#
+# --- NBT tag constructors are private now; use the factories.
+pre	new NBTTagByte\(	ByteTag.valueOf(
+pre	new NBTTagShort\(	ShortTag.valueOf(
+pre	new NBTTagInt\(	IntTag.valueOf(
+pre	new NBTTagLong\(	LongTag.valueOf(
+pre	new NBTTagFloat\(	FloatTag.valueOf(
+pre	new NBTTagDouble\(	DoubleTag.valueOf(
+pre	new NBTTagString\(	StringTag.valueOf(
+#
+# --- more members found while porting the foundation layer
+member	getXOffset	getStepX
+member	getYOffset	getStepY
+member	getZOffset	getStepZ
+member	getSizeInventory	getContainerSize
+member	setInventorySlotContents	setItem
+member	decrStackSize	removeItem
+member	removeStackFromSlot	removeItemNoUpdate
+member	getInventoryStackLimit	getMaxStackSize
+member	isItemValidForSlot	canPlaceItem
+member	isUsableByPlayer	stillValid
+member	openInventory	startOpen
+member	closeInventory	stopOpen
+post	\bDirection\.byIndex\(	Direction.from3DDataValue(
+post	\bDirection\.byHorizontalIndex\(	Direction.from2DDataValue(
+post	\bFluid\.BUCKET_VOLUME\b	net.neoforged.neoforge.fluids.FluidType.BUCKET_VOLUME
+member	getEntitiesWithinAABB	getEntitiesOfClass
+member	setPickupDelay	setPickUpDelay
+member	openContainer	containerMenu
+post	\bplayer\.inventory\b	player.getInventory
+post	\bworld\.rand\b	world.random
+post	\bItemStack\.areItemStacksEqual\(	ItemStack.matches(
+post	\bItemStack\.areItemsEqual\(	ItemStack.isSameItem(
+pre	\bcase null \| Unit \|	case null | () |

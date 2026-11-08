@@ -341,29 +341,8 @@ object DebugCard {
     for (msg <- Settings.get.debugCardAccess.checkAccess(ctx))
       throw new Exception(msg)
 
-  object AccessContext {
-    def remove(nbt: NBTTagCompound): Unit = {
-      nbt.removeTag(Settings.namespace + "player")
-      nbt.removeTag(Settings.namespace + "accessNonce")
-    }
-
-    def load(nbt: NBTTagCompound): Option[AccessContext] = {
-      if (nbt.hasKey(Settings.namespace + "player"))
-        Some(AccessContext(
-          nbt.getString(Settings.namespace + "player"),
-          nbt.getString(Settings.namespace + "accessNonce")
-        ))
-      else
-        None
-    }
-  }
-
-  case class AccessContext(player: String, nonce: String) {
-    def save(nbt: NBTTagCompound): Unit = {
-      nbt.setString(Settings.namespace + "player", player)
-      nbt.setString(Settings.namespace + "accessNonce", nonce)
-    }
-  }
+  type AccessContext = DebugCardAccessContext
+  val AccessContext: DebugCardAccessContext.type = DebugCardAccessContext
 
   class PlayerValue(var name: String)(implicit var ctx: Option[AccessContext]) extends prefab.AbstractValue {
     def this() = this("")(None) // For loading.

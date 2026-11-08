@@ -118,11 +118,34 @@ def rewrite(text, is_java, notes):
         if new_fqcn and alias is None and simple(old_fqcn) != simple(new_fqcn):
             renamed_simple[simple(old_fqcn)] = simple(new_fqcn)
 
+    def expand_wildcard(pkg, indent, java=False):
+        """pkg._ makes every old class in pkg visible: rename them all, and
+        import the packages they moved to instead."""
+        members = [old for old in CLASSES if old.rsplit('.', 1)[0] == pkg]
+        new_pkgs = []
+        for old in members:
+            new = CLASSES[old]
+            if new is None:
+                continue
+            note_rename(old, new)
+            new_pkg = new.rsplit('.', 1)[0]
+            if new_pkg not in new_pkgs:
+                new_pkgs.append(new_pkg)
+        if not new_pkgs:
+            notes.append('wildcard import with no known classes %s' % pkg)
+            new_pkgs = [pkg]
+        else:
+            notes.append('wildcard import %s expanded to %s' % (pkg, ', '.join(new_pkgs)))
+        star = '*;' if java else '_'
+        return '\n'.join('%simport %s.%s' % (indent, p, star) for p in new_pkgs)
+
     if is_java:
         def java_import(m):
             path = m.group('path')
             if m.group('static') or not path.startswith(OLD_PREFIXES):
                 return m.group(0)
+            if path.endswith('.*'):
+                return expand_wildcard(path[:-2], m.group('indent'), java=True)
             handled, new = map_class(path)
             if not handled:
                 notes.append('unmapped import ' + path)
@@ -141,8 +164,7 @@ def rewrite(text, is_java, notes):
                 return m.group(0)
             if group is None:
                 if path.endswith('._'):
-                    notes.append('wildcard import ' + path)
-                    return m.group(0)
+                    return expand_wildcard(path[:-2], indent)
                 handled, new = map_class(path)
                 if not handled:
                     if path.count('.') <= 2 or path.split('.')[-1][:1].islower():

@@ -16,6 +16,6 @@ public final class OpenComputersMod {
     public static final String MOD_ID = "opencomputers";
 
     public OpenComputersMod(final IEventBus modBus, final ModContainer container) {
-        ModBootstrap.init(modBus, container);
+        OpenComputers.init(modBus, container);
     }
 }

@@ -44,9 +44,25 @@ java {
 
 def portedSources = [
         'li/cil/oc/OpenComputersMod.java',
-        'li/cil/oc/ModBootstrap.scala',
+        'li/cil/oc/OpenComputers.scala',
         'li/cil/oc/common/gametest/**',
         'li/cil/oc/api/**',
+        // 2.2 foundation
+        'li/cil/oc/Settings.scala',
+        'li/cil/oc/Constants.scala',
+        'li/cil/oc/Localization.scala',
+        'li/cil/oc/common/Tier.scala',
+        'li/cil/oc/common/Slot.scala',
+        'li/cil/oc/util/**',
+        'li/cil/oc/server/component/DebugCardAccessContext.scala',
+]
+
+// Files under a ported path that still wait for a later step.
+def pendingSources = [
+        'li/cil/oc/util/DatabaseAccess.scala',     // 2.5, needs server components
+        'li/cil/oc/util/Audio.scala',              // M4, client only
+        'li/cil/oc/util/RenderState.scala',        // M4, client only
+        'li/cil/oc/util/OldScaledResolution.java', // M4, client only
 ]
 
 sourceSets {
@@ -57,6 +73,7 @@ sourceSets {
         scala {
             srcDirs = ['src/main/scala', 'src/main/java']
             include portedSources
+            exclude pendingSources
         }
         resources { srcDir 'src/generated/resources' }
     }
@@ -182,11 +199,14 @@ tasks.withType(ScalaCompile).configureEach {
     options.release = 21
     options.compilerArgs += ['-Xmaxerrs', '10000']
     scalaCompileOptions.additionalParameters = [
-            '-release', '21', '-deprecation', '-feature',
+            '-release', '21', '-deprecation', '-feature', '-Xmaxerrs', '10000',
             // The 1.12 code base uses procedure syntax (`def f() {`) about a
             // thousand times. It's still valid in Scala 2.13, so don't drown
             // real warnings in it.
             '-Wconf:cat=deprecation&msg=procedure syntax:s',
+            // Likewise for the implicit Java collection conversions, which
+            // the port maps to scala.collection.convert.ImplicitConversions*.
+            '-Wconf:cat=deprecation&origin=scala.collection.convert.*:s',
     ]
     configure(scalaCompileOptions.forkOptions) {
         memoryMaximumSize = '2g'

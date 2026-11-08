@@ -8,7 +8,7 @@ import li.cil.repack.org.luaj.vm2.LuaValue
 import li.cil.repack.org.luaj.vm2.Varargs
 import li.cil.repack.org.luaj.vm2.lib.VarArgFunction
 
-import scala.collection.convert.WrapAsScala._
+import scala.collection.convert.ImplicitConversionsToScala._
 import scala.collection.mutable
 import scala.language.implicitConversions
 import scala.math.ScalaNumber
@@ -34,7 +34,7 @@ object ScalaClosure {
       case null => null
       case primitive => primitive.asInstanceOf[AnyRef]
     }) match {
-      case null | Unit | _: BoxedUnit => LuaValue.NIL
+      case null | () | _: BoxedUnit => LuaValue.NIL
       case value: java.lang.Boolean => LuaValue.valueOf(value.booleanValue)
       case value: java.lang.Byte => LuaValue.valueOf(value.byteValue)
       case value: java.lang.Character => LuaValue.valueOf(String.valueOf(value))
@@ -63,8 +63,8 @@ object ScalaClosure {
   }
 
   def toLuaTable(value: Map[_, _]): LuaValue = {
-    LuaValue.tableOf(value.flatMap {
-      case (k, v) => Seq(toLuaValue(k), toLuaValue(v))
+    LuaValue.tableOf(value.toSeq.flatMap {
+      case (k: Any, v: Any) => Seq(toLuaValue(k), toLuaValue(v))
     }.toArray)
   }
 

@@ -3,7 +3,7 @@ package li.cil.oc.util
 import li.cil.oc.Settings
 import li.cil.oc.api
 import net.minecraft.nbt._
-import net.minecraftforge.common.util.Constants.NBT
+import net.minecraft.nbt.Tag
 
 import java.lang
 
@@ -259,15 +259,15 @@ class TextBuffer(var width: Int, var height: Int, initialFormat: PackedColor.Col
     }
   }
 
-  def load(nbt: NBTTagCompound): Unit = {
+  def load(nbt: CompoundTag): Unit = {
     val maxResolution = math.max(Settings.screenResolutionsByTier.last._1, Settings.screenResolutionsByTier.last._2)
-    val w = nbt.getInteger("width") min maxResolution max 1
-    val h = nbt.getInteger("height") min maxResolution max 1
+    val w = nbt.getInt("width") min maxResolution max 1
+    val h = nbt.getInt("height") min maxResolution max 1
     size = (w, h)
 
-    val b = nbt.getTagList("buffer", NBT.TAG_STRING)
-    for (i <- 0 until math.min(h, b.tagCount)) {
-      val value = b.getStringTagAt(i)
+    val b = nbt.getList("buffer", Tag.TAG_STRING)
+    for (i <- 0 until math.min(h, b.size)) {
+      val value = b.getString(i)
       val valueIt = value.codePoints.iterator()
       var j = 0
       while (j < buffer(i).length && valueIt.hasNext) {
@@ -276,33 +276,33 @@ class TextBuffer(var width: Int, var height: Int, initialFormat: PackedColor.Col
       }
     }
 
-    val depth = api.internal.TextBuffer.ColorDepth.values.apply(nbt.getInteger("depth") min (api.internal.TextBuffer.ColorDepth.values.length - 1) max 0)
+    val depth = api.internal.TextBuffer.ColorDepth.values.apply(nbt.getInt("depth") min (api.internal.TextBuffer.ColorDepth.values.length - 1) max 0)
     _format = PackedColor.Depth.format(depth)
     _format.load(nbt)
-    foreground = PackedColor.Color(nbt.getInteger("foreground"), nbt.getBoolean("foregroundIsPalette"))
-    background = PackedColor.Color(nbt.getInteger("background"), nbt.getBoolean("backgroundIsPalette"))
+    foreground = PackedColor.Color(nbt.getInt("foreground"), nbt.getBoolean("foregroundIsPalette"))
+    background = PackedColor.Color(nbt.getInt("background"), nbt.getBoolean("backgroundIsPalette"))
 
     if (!NbtDataStream.getShortArray(nbt, "colors", color, w, h)) {
       NbtDataStream.getIntArrayLegacy(nbt, "color", color, w, h)
     }
   }
 
-  def save(nbt: NBTTagCompound): Unit = {
-    nbt.setInteger("width", width)
-    nbt.setInteger("height", height)
+  def save(nbt: CompoundTag): Unit = {
+    nbt.putInt("width", width)
+    nbt.putInt("height", height)
 
-    val b = new NBTTagList()
+    val b = new ListTag()
     for (i <- 0 until height) {
-      b.appendTag(new NBTTagString(lineToString(i)))
+      b.add(StringTag.valueOf(lineToString(i)))
     }
-    nbt.setTag("buffer", b)
+    nbt.put("buffer", b)
 
-    nbt.setInteger("depth", _format.depth.ordinal)
+    nbt.putInt("depth", _format.depth.ordinal)
     _format.save(nbt)
-    nbt.setInteger("foreground", _foreground.value)
-    nbt.setBoolean("foregroundIsPalette", _foreground.isPalette)
-    nbt.setInteger("background", _background.value)
-    nbt.setBoolean("backgroundIsPalette", _background.isPalette)
+    nbt.putInt("foreground", _foreground.value)
+    nbt.putBoolean("foregroundIsPalette", _foreground.isPalette)
+    nbt.putInt("background", _background.value)
+    nbt.putBoolean("backgroundIsPalette", _background.isPalette)
 
     NbtDataStream.setShortArray(nbt, "colors", color.flatten.map(_.toShort))
   }

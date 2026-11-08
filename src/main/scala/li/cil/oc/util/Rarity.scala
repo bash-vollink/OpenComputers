@@ -1,9 +1,9 @@
 package li.cil.oc.util
 
-import net.minecraft.item.EnumRarity
+import net.minecraft.world.item.{Rarity => MCRarity}
 
 object Rarity {
-  private val lookup = Array(EnumRarity.COMMON, EnumRarity.UNCOMMON, EnumRarity.RARE, EnumRarity.EPIC)
+  private val lookup = Array(MCRarity.COMMON, MCRarity.UNCOMMON, MCRarity.RARE, MCRarity.EPIC)
 
   def byTier(tier: Int) = lookup(tier max 0 min (lookup.length - 1))
 }

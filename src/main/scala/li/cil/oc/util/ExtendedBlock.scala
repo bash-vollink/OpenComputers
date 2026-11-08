@@ -1,8 +1,10 @@
 package li.cil.oc.util
 
-import net.minecraft.block.Block
-import net.minecraft.util.EnumFacing
-import net.minecraftforge.fluids.IFluidBlock
+import net.minecraft.core.Direction
+import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.phys.AABB
+import net.minecraft.world.phys.shapes.VoxelShape
 
 import scala.language.implicitConversions
 
@@ -10,28 +12,30 @@ object ExtendedBlock {
 
   implicit def extendedBlock(block: Block): ExtendedBlock = new ExtendedBlock(block)
 
+  // Since 1.13 most per-position block queries live on BlockState; these keep
+  // the old position-based helpers working.
   class ExtendedBlock(val block: Block) {
-    def isAir(position: BlockPosition) = block.isAir(position.world.get.getBlockState(position.toBlockPos), position.world.get, position.toBlockPos)
+    private def state(position: BlockPosition): BlockState = position.world.get.getBlockState(position.toBlockPos)
 
-    def isReplaceable(position: BlockPosition) = block.isReplaceable(position.world.get, position.toBlockPos)
+    def isAir(position: BlockPosition): Boolean = state(position).isAir
 
-    def getBlockHardness(position: BlockPosition) = block.getBlockHardness(position.world.get.getBlockState(position.toBlockPos), position.world.get, position.toBlockPos)
+    def isReplaceable(position: BlockPosition): Boolean = state(position).canBeReplaced()
 
-    def getSelectedBoundingBoxFromPool(position: BlockPosition) = block.getSelectedBoundingBox(position.world.get.getBlockState(position.toBlockPos), position.world.get, position.toBlockPos)
+    def getBlockHardness(position: BlockPosition): Float = state(position).getDestroySpeed(position.world.get, position.toBlockPos)
 
-    def getCollisionBoundingBoxFromPool(position: BlockPosition) = block.getCollisionBoundingBox(position.world.get.getBlockState(position.toBlockPos), position.world.get, position.toBlockPos)
+    /** World-space bounds of the block's outline shape, or null if it has none. */
+    def getSelectedBoundingBoxFromPool(position: BlockPosition): AABB =
+      worldBounds(state(position).getShape(position.world.get, position.toBlockPos), position)
 
-    def getComparatorInputOverride(position: BlockPosition, side: EnumFacing) = block.getComparatorInputOverride(position.world.get.getBlockState(position.toBlockPos), position.world.get, position.toBlockPos)
-  }
+    /** World-space bounds of the block's collision shape, or null if it has none. */
+    def getCollisionBoundingBoxFromPool(position: BlockPosition): AABB =
+      worldBounds(state(position).getCollisionShape(position.world.get, position.toBlockPos), position)
 
-  implicit def extendedFluidBlock(block: IFluidBlock): ExtendedFluidBlock = new ExtendedFluidBlock(block)
+    def getComparatorInputOverride(position: BlockPosition, side: Direction): Int =
+      state(position).getAnalogOutputSignal(position.world.get, position.toBlockPos)
 
-  class ExtendedFluidBlock(val block: IFluidBlock) {
-    def drain(position: BlockPosition, doDrain: Boolean) = block.drain(position.world.get, position.toBlockPos, doDrain)
-
-    def canDrain(position: BlockPosition) = block.canDrain(position.world.get, position.toBlockPos)
-
-    def getFilledPercentage(position: BlockPosition) = block.getFilledPercentage(position.world.get, position.toBlockPos)
+    private def worldBounds(shape: VoxelShape, position: BlockPosition): AABB =
+      if (shape.isEmpty) null else shape.bounds.move(position.toBlockPos)
   }
 
 }

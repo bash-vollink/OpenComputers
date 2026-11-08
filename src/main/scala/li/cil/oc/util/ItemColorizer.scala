@@ -1,47 +1,26 @@
 package li.cil.oc.util
 
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.world.item.ItemStack
+import net.minecraft.core.component.DataComponents
+import net.minecraft.world.item.component.DyedItemColor
 
 /**
+  * Item colors live in the vanilla DYED_COLOR component since 1.20.5.
+  *
   * @author asie, Vexatos
   */
 object ItemColorizer {
   /**
     * Return whether the specified armor ItemStack has a color.
     */
-  def hasColor(stack: ItemStack): Boolean = stack.hasTagCompound && stack.getTagCompound.hasKey("display") && stack.getTagCompound.getCompoundTag("display").hasKey("color")
+  def hasColor(stack: ItemStack): Boolean = stack.has(DataComponents.DYED_COLOR)
 
   /**
     * Return the color for the specified armor ItemStack.
     */
-  def getColor(stack: ItemStack): Int = {
-    val tag = stack.getTagCompound
-    if (tag != null) {
-      val displayTag = tag.getCompoundTag("display")
-      if (displayTag == null) -1 else if (displayTag.hasKey("color")) displayTag.getInteger("color") else -1
-    }
-    else -1
-  }
+  def getColor(stack: ItemStack): Int = Option(stack.get(DataComponents.DYED_COLOR)).fold(-1)(_.rgb)
 
-  def removeColor(stack: ItemStack) {
-    val tag = stack.getTagCompound
-    if (tag != null) {
-      val displayTag = tag.getCompoundTag("display")
-      if (displayTag.hasKey("color")) displayTag.removeTag("color")
-    }
-  }
+  def removeColor(stack: ItemStack): Unit = stack.remove(DataComponents.DYED_COLOR)
 
-  def setColor(stack: ItemStack, color: Int) {
-    var tag = stack.getTagCompound
-    if (tag == null) {
-      tag = new NBTTagCompound
-      stack.setTagCompound(tag)
-    }
-    val displayTag = tag.getCompoundTag("display")
-    if (!tag.hasKey("display")) {
-      tag.setTag("display", displayTag)
-    }
-    displayTag.setInteger("color", color)
-  }
+  def setColor(stack: ItemStack, color: Int): Unit = stack.set(DataComponents.DYED_COLOR, new DyedItemColor(color, true))
 }

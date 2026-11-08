@@ -9,7 +9,7 @@ import li.cil.repack.com.naef.jnlua.JavaFunction
 import li.cil.repack.com.naef.jnlua.LuaState
 import li.cil.repack.com.naef.jnlua.LuaType
 
-import scala.collection.convert.WrapAsScala._
+import scala.collection.convert.ImplicitConversionsToScala._
 import scala.collection.mutable
 import scala.language.implicitConversions
 import scala.math.ScalaNumber
@@ -37,7 +37,7 @@ object ExtendedLuaState {
           case null => null
           case primitive => primitive.asInstanceOf[AnyRef]
         }) match {
-          case null | Unit | _: BoxedUnit => lua.pushNil()
+          case null | () | _: BoxedUnit => lua.pushNil()
           case value: java.lang.Boolean => lua.pushBoolean(value.booleanValue)
           case value: java.lang.Byte => lua.pushInteger(value.byteValue)
           case value: java.lang.Character => lua.pushString(String.valueOf(value))
@@ -50,7 +50,7 @@ object ExtendedLuaState {
           case value: Array[Byte] => lua.pushByteArray(value)
           case value: Array[_] => pushList(value, value.zipWithIndex.iterator, memo)
           case value: Value if Settings.get.allowUserdata => lua.pushJavaObjectRaw(value)
-          case value: Product => pushList(value, value.productIterator.zipWithIndex, memo)
+          case value: Product => pushList(value.asInstanceOf[AnyRef], value.productIterator.zipWithIndex, memo)
           case value: Seq[_] => pushList(value, value.zipWithIndex.iterator, memo)
           case value: java.util.Map[_, _] => pushTable(value, value.toMap, memo)
           case value: Map[_, _] => pushTable(value, value, memo)
