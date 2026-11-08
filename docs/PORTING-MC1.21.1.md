@@ -111,7 +111,7 @@ Any intermediate MC version would be throwaway work, so the plan goes straight t
 - Dropped (not on 1.21.1): IC2, BuildCraft, Forestry, ProjectRed, Thaumcraft, Charset, EnderIO, Railcraft, CoFH, WR-CBE, EnderStorage, ExtraCells, TIS-3D. Delete their `integration/*` folders and update `Mods.scala`.
 
 ## Milestones (one commit or PR series each)
-1. Toolchain builds an empty NeoForge mod with Scala bundled (Phase 0).
+1. ✅ Toolchain builds an empty NeoForge mod with Scala bundled (Phase 0). See "Milestone 1 notes" below.
 2. Core compiles with integrations stubbed (Phases 1–3).
 3. Game launches, and blocks and items exist with textures (3–4).
 4. A Case, CPU, RAM, EEPROM, HDD, screen and keyboard boot OpenOS (5–8, screen rendering first).
@@ -131,3 +131,20 @@ Any intermediate MC version would be throwaway work, so the plan goes straight t
 - Screen text rendering performance without display lists.
 - Robot FakePlayer interactions.
 - The breaking API change for third-party addons.
+
+## Milestone 1 notes
+- **Toolchain:** Gradle 8.14.3, ModDevGradle 2.0.148, NeoForge 21.1.250, Parchment 2024.11.17, Java 21, Scala 2.13.16. All versions are in `gradle.properties`; `build.properties` is gone.
+- **Entry point:** `li.cil.oc.OpenComputersMod` (Java, `@Mod`) hands off to `li.cil.oc.ModBootstrap` (Scala). No Scala language provider is used. Java and Scala are compiled jointly by scalac, with both `src/main/java` and `src/main/scala` in the Scala source set, because the two languages reference each other.
+- **Legacy sources:** the 1.12 code stays in place but is left out of compilation. Only paths in `portedSources` in `build.gradle` compile. Grow that list as files are ported, and delete it once everything compiles. Tests are excluded until the code they cover is ported.
+- **Bundled libraries:**
+  - Scala and Typesafe Config ship as jar-in-jar.
+  - The relocated LuaJ, JNLua and JNLua natives are merged into the mod jar, as before.
+  - In dev, non-mod libraries must also be on `additionalRuntimeClasspath`, or the game can't see them (`ClassNotFoundException: scala.…`).
+- **Verified:**
+  - `./gradlew build` passes.
+  - `./gradlew runGameTestServer` passes `BootstrapGameTests.scalaRuntimeLoaded`, using the `opencomputers:empty` 1×1×1 template.
+  - The built jar loads in a real NeoForge 21.1.250 dedicated server, which starts normally.
+- **Known gaps:**
+  - `runGameTestServer` exits 0 even when mod loading crashes. CI must grep for `All N required tests passed` until this is fixed.
+  - The CurseForge upload (`cursegradle` 1.4.0 doesn't support Gradle 8) has been removed for now. Modrinth publishing is kept.
+  - `runClient` hasn't been tried (no display in the dev container).

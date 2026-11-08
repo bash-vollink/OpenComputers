@@ -2,13 +2,10 @@ pluginManagement {
     repositories {
         gradlePluginPortal()
         maven {
-            name 'MinecraftForge'
-            url 'https://files.minecraftforge.net/maven'
-        }
-        maven {
-            name 'FancyGradle'
-            url 'https://maven.gofancy.wtf/releases'
+            name = 'NeoForged'
+            url = 'https://maven.neoforged.net/releases'
         }
     }
 }
-rootProject.name = "opencomputers-1.12.2-forge"
+
+rootProject.name = 'opencomputers-1.21.1-neoforge'
