@@ -6,10 +6,10 @@ import li.cil.oc.api.network.Node;
 import li.cil.oc.api.network.Packet;
 import li.cil.oc.api.network.Visibility;
 import li.cil.oc.api.network.WirelessEndpoint;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
 
 /**
  * This class provides factories for networks and nodes.
@@ -31,7 +31,7 @@ import net.minecraft.world.IBlockAccess;
  */
 public final class Network {
     /**
-     * Convenience overload for {@link #joinOrCreateNetwork(IBlockAccess, BlockPos)}.
+     * Convenience overload for {@link #joinOrCreateNetwork(BlockGetter, BlockPos)}.
      * <br>
      * If the tile entity implements {@link Environment} its one node will be
      * connected to any existing adjacent tile entity nodes. If none exist a
@@ -44,7 +44,7 @@ public final class Network {
      *
      * @param tileEntity the tile entity to initialize.
      */
-    public static void joinOrCreateNetwork(final TileEntity tileEntity) {
+    public static void joinOrCreateNetwork(final BlockEntity tileEntity) {
         if (API.network != null)
             API.network.joinOrCreateNetwork(tileEntity);
     }
@@ -56,7 +56,7 @@ public final class Network {
      * @param world the world containing the location to connect.
      * @param pos   the position at which to update the network.
      */
-    public static void joinOrCreateNetwork(final IBlockAccess world, final BlockPos pos) {
+    public static void joinOrCreateNetwork(final BlockGetter world, final BlockPos pos) {
         if (API.network != null)
             API.network.joinOrCreateNetwork(world, pos);
     }
@@ -173,7 +173,7 @@ public final class Network {
      * <br>
      * Example use:
      * <pre>
-     * class YourThing extends TileEntity implements Environment {
+     * class YourThing extends BlockEntity implements Environment {
      *     private ComponentConnector node_ =
      *         api.Network.newNode(this, Visibility.Network).
      *             withComponent("your_thing").
@@ -233,7 +233,7 @@ public final class Network {
      * @param nbt the tag to load the packet from.
      * @return the loaded packet.
      */
-    public static Packet newPacket(final NBTTagCompound nbt) {
+    public static Packet newPacket(final CompoundTag nbt) {
         if (API.network != null)
             return API.network.newPacket(nbt);
         return null;

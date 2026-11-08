@@ -1,8 +1,8 @@
 package li.cil.oc.api.prefab;
 
 import li.cil.oc.api.network.EnvironmentHost;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 
 /**
  * If you wish to create item components such as the network card or hard drives
@@ -30,7 +30,7 @@ public abstract class DriverItem implements li.cil.oc.api.driver.DriverItem {
     public boolean worksWith(final ItemStack stack) {
         if (!stack.isEmpty()) {
             for (ItemStack item : items) {
-                if (!item.isEmpty() && item.isItemEqual(stack)) {
+                if (!item.isEmpty() && ItemStack.isSameItem(item, stack)) {
                     return true;
                 }
             }
@@ -41,20 +41,6 @@ public abstract class DriverItem implements li.cil.oc.api.driver.DriverItem {
     @Override
     public int tier(final ItemStack stack) {
         return 0;
-    }
-
-    @Override
-    public NBTTagCompound dataTag(final ItemStack stack) {
-        if (!stack.hasTagCompound()) {
-            stack.setTagCompound(new NBTTagCompound());
-        }
-        final NBTTagCompound nbt = stack.getTagCompound();
-        // This is the suggested key under which to store item component data.
-        // You are free to change this as you please.
-        if (!nbt.hasKey("oc:data")) {
-            nbt.setTag("oc:data", new NBTTagCompound());
-        }
-        return nbt.getCompoundTag("oc:data");
     }
 
     // Convenience methods provided for HostAware drivers.

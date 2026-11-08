@@ -5,14 +5,14 @@ import li.cil.oc.api.network.Node;
 import li.cil.oc.api.network.Packet;
 import li.cil.oc.api.network.Visibility;
 import li.cil.oc.api.network.WirelessEndpoint;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
 
 public interface NetworkAPI {
     /**
-     * Convenience overload for {@link #joinOrCreateNetwork(IBlockAccess, BlockPos)}.
+     * Convenience overload for {@link #joinOrCreateNetwork(BlockGetter, BlockPos)}.
      * <br>
      * If the tile entity implements {@link Environment} its one node will be
      * connected to any existing adjacent tile entity nodes. If none exist a
@@ -25,7 +25,7 @@ public interface NetworkAPI {
      *
      * @param tileEntity the tile entity to initialize.
      */
-    void joinOrCreateNetwork(TileEntity tileEntity);
+    void joinOrCreateNetwork(BlockEntity tileEntity);
 
     /**
      * Tries to add network node(s) at the specified coordinates to adjacent
@@ -34,7 +34,7 @@ public interface NetworkAPI {
      * @param world the world containing the location to connect.
      * @param pos   the position at which to update the network.
      */
-    void joinOrCreateNetwork(IBlockAccess world, BlockPos pos);
+    void joinOrCreateNetwork(BlockGetter world, BlockPos pos);
 
     /**
      * Creates a new network with the specified node as its initial node.
@@ -130,7 +130,7 @@ public interface NetworkAPI {
      * <br>
      * Example use:
      * <pre>
-     * class YourThing extends TileEntity implements Environment {
+     * class YourThing extends BlockEntity implements Environment {
      *     private ComponentConnector node_ =
      *         api.Network.newNode(this, Visibility.Network).
      *             withComponent("your_thing").
@@ -182,5 +182,5 @@ public interface NetworkAPI {
      * @param nbt the tag to load the packet from.
      * @return the loaded packet.
      */
-    Packet newPacket(NBTTagCompound nbt);
+    Packet newPacket(CompoundTag nbt);
 }

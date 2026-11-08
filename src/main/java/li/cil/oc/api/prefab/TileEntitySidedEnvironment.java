@@ -3,10 +3,14 @@ package li.cil.oc.api.prefab;
 import li.cil.oc.api.Network;
 import li.cil.oc.api.network.Node;
 import li.cil.oc.api.network.SidedEnvironment;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ITickable;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * TileEntities can implement the {@link li.cil.oc.api.network.SidedEnvironment}
@@ -19,7 +23,7 @@ import net.minecraft.util.ITickable;
  * network as an index structure to find other nodes connected to them.
  */
 @SuppressWarnings("UnusedDeclaration")
-public abstract class TileEntitySidedEnvironment extends TileEntity implements SidedEnvironment, ITickable {
+public abstract class TileEntitySidedEnvironment extends BlockEntity implements SidedEnvironment {
     // See constructor.
     protected Node[] nodes = new Node[6];
 
@@ -60,7 +64,8 @@ public abstract class TileEntitySidedEnvironment extends TileEntity implements S
      *       .create(), ...);
      * </pre>
      */
-    protected TileEntitySidedEnvironment(final Node... nodes) {
+    protected TileEntitySidedEnvironment(final BlockEntityType<?> type, final BlockPos pos, final BlockState state, final Node... nodes) {
+        super(type, pos, state);
         System.arraycopy(nodes, 0, this.nodes, 0, Math.min(nodes.length, this.nodes.length));
     }
 
@@ -72,13 +77,23 @@ public abstract class TileEntitySidedEnvironment extends TileEntity implements S
     // exists for a side won't work on the client.
 
     @Override
-    public Node sidedNode(final EnumFacing side) {
+    public Node sidedNode(final Direction side) {
         return nodes[side.ordinal()];
     }
 
     // ----------------------------------------------------------------------- //
 
-    @Override
+    /**
+     * Ticker for use in your block's {@code getTicker}, for example
+     * {@code return TileEntitySidedEnvironment::tick;}. Calls {@link #update()}.
+     */
+    public static <T extends TileEntitySidedEnvironment> void tick(final Level level, final BlockPos pos, final BlockState state, final T blockEntity) {
+        blockEntity.update();
+    }
+
+    /**
+     * Must be called every tick, typically via {@link #tick}.
+     */
     public void update() {
         // On the first update, try to add our node to nearby networks. We do
         // this in the update logic, not in validate() because we need to access
@@ -94,8 +109,8 @@ public abstract class TileEntitySidedEnvironment extends TileEntity implements S
     }
 
     @Override
-    public void onChunkUnload() {
-        super.onChunkUnload();
+    public void onChunkUnloaded() {
+        super.onChunkUnloaded();
         // Make sure to remove the node from its network when its environment,
         // meaning this tile entity, gets unloaded.
         for (Node node : nodes) {
@@ -104,8 +119,8 @@ public abstract class TileEntitySidedEnvironment extends TileEntity implements S
     }
 
     @Override
-    public void invalidate() {
-        super.invalidate();
+    public void setRemoved() {
+        super.setRemoved();
         // Make sure to remove the node from its network when its environment,
         // meaning this tile entity, gets unloaded.
         for (Node node : nodes) {
@@ -116,8 +131,8 @@ public abstract class TileEntitySidedEnvironment extends TileEntity implements S
     // ----------------------------------------------------------------------- //
 
     @Override
-    public void readFromNBT(final NBTTagCompound nbt) {
-        super.readFromNBT(nbt);
+    protected void loadAdditional(final CompoundTag nbt, final HolderLookup.Provider registries) {
+        super.loadAdditional(nbt, registries);
         int index = 0;
         for (Node node : nodes) {
             // The host check may be superfluous for you. It's just there to allow
@@ -129,25 +144,24 @@ public abstract class TileEntitySidedEnvironment extends TileEntity implements S
                 // to continue working without interruption across loads. If the
                 // node is a power connector this is also required to restore the
                 // internal energy buffer of the node.
-                node.load(nbt.getCompoundTag("oc:node" + index));
+                node.load(nbt.getCompound("oc:node" + index));
             }
             ++index;
         }
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
-        super.writeToNBT(nbt);
+    protected void saveAdditional(final CompoundTag nbt, final HolderLookup.Provider registries) {
+        super.saveAdditional(nbt, registries);
         int index = 0;
         for (Node node : nodes) {
             // See readFromNBT() regarding host check.
             if (node != null && node.host() == this) {
-                final NBTTagCompound nodeNbt = new NBTTagCompound();
+                final CompoundTag nodeNbt = new CompoundTag();
                 node.save(nodeNbt);
-                nbt.setTag("oc:node" + index, nodeNbt);
+                nbt.put("oc:node" + index, nodeNbt);
             }
             ++index;
         }
-        return nbt;
     }
 }

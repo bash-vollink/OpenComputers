@@ -1,11 +1,11 @@
 package li.cil.oc.api.event;
 
 import li.cil.oc.api.network.Node;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.common.eventhandler.Cancelable;
-import net.minecraftforge.fml.common.eventhandler.Event;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.Level;
+import net.neoforged.bus.api.ICancellableEvent;
+import net.neoforged.bus.api.Event;
 
 /**
  * Events for handling file system access and representing it on the client.
@@ -19,11 +19,10 @@ import net.minecraftforge.fml.common.eventhandler.Event;
  * Canceling this event is provided to allow registering higher priority
  * event handlers that override default behavior.
  */
-@Cancelable
-public class FileSystemAccessEvent extends Event {
+public class FileSystemAccessEvent extends Event implements ICancellableEvent {
     protected String sound;
 
-    protected World world;
+    protected Level world;
 
     protected double x;
 
@@ -31,9 +30,9 @@ public class FileSystemAccessEvent extends Event {
 
     protected double z;
 
-    protected TileEntity tileEntity;
+    protected BlockEntity tileEntity;
 
-    protected NBTTagCompound data;
+    protected CompoundTag data;
 
     /**
      * Constructor for tile entity hosted file systems.
@@ -42,12 +41,12 @@ public class FileSystemAccessEvent extends Event {
      * @param tileEntity the tile entity hosting the file system.
      * @param data       the additional data.
      */
-    protected FileSystemAccessEvent(String sound, TileEntity tileEntity, NBTTagCompound data) {
+    protected FileSystemAccessEvent(String sound, BlockEntity tileEntity, CompoundTag data) {
         this.sound = sound;
-        this.world = tileEntity.getWorld();
-        this.x = tileEntity.getPos().getX() + 0.5;
-        this.y = tileEntity.getPos().getY() + 0.5;
-        this.z = tileEntity.getPos().getZ() + 0.5;
+        this.world = tileEntity.getLevel();
+        this.x = tileEntity.getBlockPos().getX() + 0.5;
+        this.y = tileEntity.getBlockPos().getY() + 0.5;
+        this.z = tileEntity.getBlockPos().getZ() + 0.5;
         this.tileEntity = tileEntity;
         this.data = data;
     }
@@ -62,7 +61,7 @@ public class FileSystemAccessEvent extends Event {
      * @param z     the z coordinate of the file system's container.
      * @param data  the additional data.
      */
-    protected FileSystemAccessEvent(String sound, World world, double x, double y, double z, NBTTagCompound data) {
+    protected FileSystemAccessEvent(String sound, Level world, double x, double y, double z, CompoundTag data) {
         this.sound = sound;
         this.world = world;
         this.x = x;
@@ -82,7 +81,7 @@ public class FileSystemAccessEvent extends Event {
     /**
      * The world the file system lives in.
      */
-    public World getWorld() {
+    public Level getLevel() {
         return world;
     }
 
@@ -113,7 +112,7 @@ public class FileSystemAccessEvent extends Event {
      * <em>Important</em>: this can be <tt>null</tt>, which is usually the
      * case when the container is an entity or item.
      */
-    public TileEntity getTileEntity() {
+    public BlockEntity getBlockEntity() {
         return tileEntity;
     }
 
@@ -121,20 +120,20 @@ public class FileSystemAccessEvent extends Event {
      * Addition custom data, this is used to transmit the number of the server
      * in a server rack the file system lives in, for example.
      */
-    public NBTTagCompound getData() {
+    public CompoundTag getData() {
         return data;
     }
 
     public static final class Server extends FileSystemAccessEvent {
         private Node node;
 
-        public Server(String sound, TileEntity tileEntity, Node node) {
-            super(sound, tileEntity, new NBTTagCompound());
+        public Server(String sound, BlockEntity tileEntity, Node node) {
+            super(sound, tileEntity, new CompoundTag());
             this.node = node;
         }
 
-        public Server(String sound, World world, double x, double y, double z, Node node) {
-            super(sound, world, x, y, z, new NBTTagCompound());
+        public Server(String sound, Level world, double x, double y, double z, Node node) {
+            super(sound, world, x, y, z, new CompoundTag());
             this.node = node;
         }
 
@@ -154,7 +153,7 @@ public class FileSystemAccessEvent extends Event {
          * @param tileEntity the tile entity hosting the file system.
          * @param data       the additional data.
          */
-        public Client(String sound, TileEntity tileEntity, NBTTagCompound data) {
+        public Client(String sound, BlockEntity tileEntity, CompoundTag data) {
             super(sound, tileEntity, data);
         }
 
@@ -168,7 +167,7 @@ public class FileSystemAccessEvent extends Event {
          * @param z     the z coordinate of the file system's container.
          * @param data  the additional data.
          */
-        public Client(String sound, World world, double x, double y, double z, NBTTagCompound data) {
+        public Client(String sound, Level world, double x, double y, double z, CompoundTag data) {
             super(sound, world, x, y, z, data);
         }
     }

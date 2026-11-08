@@ -1,8 +1,8 @@
 package li.cil.oc.api.driver;
 
 import li.cil.oc.api.network.ManagedEnvironment;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 
 /**
  * Interface for item component drivers.
@@ -95,20 +95,33 @@ public interface DriverItem {
      * Get the tag compound based on the item stack to use for persisting the
      * environment associated with the specified item stack.
      * <br>
-     * This is only used if the item has an environment. This must always be a
-     * child tag of the item stack's own tag compound, it will not be saved
-     * otherwise. Use this in the unlikely case that the default name collides
-     * with something. The built-in components use a child tag-compound with
-     * the name <tt>oc:data</tt>, which will also be used if this returns
-     * <tt>null</tt>.
+     * This is only used if the item has an environment. The built-in
+     * components use the child tag-compound {@code oc:data} of the stack's
+     * custom data (see {@link li.cil.oc.api.util.StackData}).
+     * <br>
+     * Since 1.21 this returns a <em>copy</em>: item stacks no longer have a
+     * mutable tag compound. Changes are only kept when written back with
+     * {@link #setDataTag(ItemStack, CompoundTag)}. Override both methods
+     * together.
      * <br>
      * This tag will be passed to the environment's <tt>save</tt> and
      * <tt>load</tt> methods when appropriate (world save / load and when
      * removed from their hosting inventory).
      *
      * @param stack the item to get the child tag from.
-     * @return the tag to use for saving and loading, or <tt>null</tt> to use
-     * the default tag <tt>oc:data</tt>.
+     * @return a copy of the tag to use for saving and loading.
      */
-    NBTTagCompound dataTag(ItemStack stack);
+    default CompoundTag dataTag(ItemStack stack) {
+        return li.cil.oc.api.util.StackData.getData(stack);
+    }
+
+    /**
+     * Writes back the tag compound returned by {@link #dataTag(ItemStack)}.
+     *
+     * @param stack the item to store the tag on.
+     * @param tag   the tag to store.
+     */
+    default void setDataTag(ItemStack stack, CompoundTag tag) {
+        li.cil.oc.api.util.StackData.setData(stack, tag);
+    }
 }

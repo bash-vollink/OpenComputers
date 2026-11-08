@@ -106,3 +106,5 @@ member	addVector	add
 # --- text
 member	getUnformattedText	getString
 member	getFormattedText	getString
+member	getPos	getBlockPos
+member	getWorld	getLevel

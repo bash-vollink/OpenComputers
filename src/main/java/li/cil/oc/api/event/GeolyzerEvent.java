@@ -1,9 +1,9 @@
 package li.cil.oc.api.event;
 
 import li.cil.oc.api.network.EnvironmentHost;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.common.eventhandler.Cancelable;
-import net.minecraftforge.fml.common.eventhandler.Event;
+import net.minecraft.core.BlockPos;
+import net.neoforged.bus.api.ICancellableEvent;
+import net.neoforged.bus.api.Event;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,8 +14,7 @@ import java.util.Map;
  * When cancelling this event, the respective method will bail and report
  * that the operation failed.
  */
-@Cancelable
-public abstract class GeolyzerEvent extends Event {
+public abstract class GeolyzerEvent extends Event implements ICancellableEvent {
     /**
      * The container of the geolyzer component. This can either be the
      * geolyzer block, or something with the geolyzer upgrade (a robot).

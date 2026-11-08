@@ -46,6 +46,7 @@ def portedSources = [
         'li/cil/oc/OpenComputersMod.java',
         'li/cil/oc/ModBootstrap.scala',
         'li/cil/oc/common/gametest/**',
+        'li/cil/oc/api/**',
 ]
 
 sourceSets {
@@ -179,6 +180,7 @@ tasks.withType(JavaCompile).configureEach {
 tasks.withType(ScalaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.release = 21
+    options.compilerArgs += ['-Xmaxerrs', '10000']
     scalaCompileOptions.additionalParameters = [
             '-release', '21', '-deprecation', '-feature',
             // The 1.12 code base uses procedure syntax (`def f() {`) about a

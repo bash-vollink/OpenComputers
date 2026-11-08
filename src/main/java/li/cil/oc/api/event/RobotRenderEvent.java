@@ -3,10 +3,10 @@ package li.cil.oc.api.event;
 import li.cil.oc.api.driver.item.UpgradeRenderer;
 import li.cil.oc.api.internal.Agent;
 import li.cil.oc.api.internal.Robot;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.fml.common.eventhandler.Cancelable;
-import org.lwjgl.util.vector.Vector3f;
-import org.lwjgl.util.vector.Vector4f;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.bus.api.ICancellableEvent;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import java.util.Set;
 
@@ -20,8 +20,7 @@ import java.util.Set;
  * <em>Important</em>: the robot instance may be null in this event, in
  * case the render pass is for rendering the robot in an inventory.
  */
-@Cancelable
-public class RobotRenderEvent extends RobotEvent {
+public class RobotRenderEvent extends RobotEvent implements ICancellableEvent {
     /**
      * Points on the robot at which component models may be rendered.
      * <br>

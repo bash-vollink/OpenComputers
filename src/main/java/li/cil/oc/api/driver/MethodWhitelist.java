@@ -1,6 +1,6 @@
 package li.cil.oc.api.driver;
 
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 
 /**
  * This interface can be implemented by environments to enforce a method
