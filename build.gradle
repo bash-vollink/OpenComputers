@@ -179,7 +179,13 @@ tasks.withType(JavaCompile).configureEach {
 tasks.withType(ScalaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.release = 21
-    scalaCompileOptions.additionalParameters = ['-release', '21', '-deprecation', '-feature']
+    scalaCompileOptions.additionalParameters = [
+            '-release', '21', '-deprecation', '-feature',
+            // The 1.12 code base uses procedure syntax (`def f() {`) about a
+            // thousand times. It's still valid in Scala 2.13, so don't drown
+            // real warnings in it.
+            '-Wconf:cat=deprecation&msg=procedure syntax:s',
+    ]
     configure(scalaCompileOptions.forkOptions) {
         memoryMaximumSize = '2g'
     }

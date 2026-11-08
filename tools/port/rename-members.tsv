@@ -1,0 +1,108 @@
+# Member and expression rewrites, applied by apply_renames.py.
+# Columns: kind <TAB> old <TAB> new
+#   pre    - Python regex, applied BEFORE class renames (can match old class names)
+#   member - method/field name after a '.', i.e. regex \.old\b -> .new
+#            Only MCP names that are unambiguous in this codebase belong here.
+#   post   - Python regex, applied AFTER class renames
+#
+# --- expressions that depend on the old class name
+pre	new TextComponentString\(	Component.literal(
+pre	new TextComponentTranslation\(	Component.translatable(
+pre	\bSide\.CLIENT\b	Dist.CLIENT
+pre	\bSide\.SERVER\b	Dist.DEDICATED_SERVER
+pre	\bEnumFacing\.VALUES\b	Direction.values
+pre	\bEnumFacing\.getFront\(	Direction.from3DDataValue(
+pre	\bEnumFacing\.getHorizontal\(	Direction.from2DDataValue(
+pre	\bEnumFacing\.getFacingFromVector\(	Direction.getNearest(
+pre	\bEnumDyeColor\.SILVER\b	EnumDyeColor.LIGHT_GRAY
+pre	\bEnumDyeColor\.byMetadata\(	EnumDyeColor.byId(
+pre	\bEnumDyeColor\.byDyeDamage\(	EnumDyeColor.byId(
+pre	\bConstants\.NBT\.	Tag.
+pre	ActionResult\.newResult\(	new ActionResult(
+#
+# --- NBT
+member	setInteger	putInt
+member	getInteger	getInt
+member	setBoolean	putBoolean
+member	setString	putString
+member	setByte	putByte
+member	setShort	putShort
+member	setLong	putLong
+member	setFloat	putFloat
+member	setDouble	putDouble
+member	setByteArray	putByteArray
+member	setIntArray	putIntArray
+member	setTag	put
+member	setUniqueId	putUUID
+member	hasKey	contains
+member	removeTag	remove
+member	getCompoundTag	getCompound
+member	getTagList	getList
+member	getKeySet	getAllKeys
+member	appendTag	add
+member	tagCount	size
+member	getCompoundTagAt	getCompound
+member	getStringTagAt	getString
+member	hasNoTags	isEmpty
+member	getTagId	getId
+#
+# --- level / block entity
+member	isRemote	isClientSide
+member	markDirty	setChanged
+member	getTileEntity	getBlockEntity
+member	setTileEntity	setBlockEntity
+member	removeTileEntity	removeBlockEntity
+member	getTotalWorldTime	getGameTime
+member	getWorldTime	getDayTime
+member	spawnEntity	addFreshEntity
+member	isBlockLoaded	isLoaded
+member	setBlockState	setBlock
+member	isAirBlock	isEmptyBlock
+member	getRedstonePower	getSignal
+member	isBlockIndirectlyGettingPowered	getBestNeighborSignal
+member	getStrongPower	getDirectSignal
+member	notifyNeighborsOfStateChange	updateNeighborsAt
+member	notifyBlockUpdate	sendBlockUpdated
+member	getMinecraftServer	getServer
+member	getDefaultState	defaultBlockState
+member	getEntityWorld	level()
+#
+# --- item stacks
+member	getItemDamage	getDamageValue
+member	setItemDamage	setDamageValue
+member	getUnlocalizedName	getDescriptionId
+member	getTranslationKey	getDescriptionId
+member	splitStack	split
+member	isItemStackDamageable	isDamageableItem
+#
+# --- entities / players
+member	posX	getX()
+member	posY	getY()
+member	posZ	getZ()
+member	rotationYaw	getYRot()
+member	rotationPitch	getXRot()
+member	getHeldItem	getItemInHand
+member	setHeldItem	setItemInHand
+member	isSneaking	isShiftKeyDown
+member	getDistanceSq	distanceToSqr
+member	getUniqueID	getUUID
+member	setDead	discard
+member	getEntityId	getId
+member	getPositionVector	position
+member	getEntityBoundingBox	getBoundingBox
+#
+# --- direction / positions / math
+member	getIndex	get3DDataValue
+member	getHorizontalIndex	get2DDataValue
+member	getFrontOffsetX	getStepX
+member	getFrontOffsetY	getStepY
+member	getFrontOffsetZ	getStepZ
+member	rotateY	getClockWise
+member	rotateYCCW	getCounterClockWise
+member	up	above
+member	down	below
+member	addVector	add
+#
+# --- text
+member	getUnformattedText	getString
+member	getFormattedText	getString
